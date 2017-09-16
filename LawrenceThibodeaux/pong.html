@@ -1,0 +1,89 @@
+<html>
+  <head>
+    Welcome to Pong Land <br/>
+  </head>
+  <body>
+	<canvas id="canvas" width="640" height="480" />
+	<script>
+	  // Filthy globals
+	  playerPaddleY = compPaddleY = 40;
+	  paddleWidth = 10;
+	  paddleHeight = 100;
+	  ballX = ballY = 50;
+      ballDX = ballDY = 4;
+	  ballSize = 5;
+	  playerScore = compScore = 0;
+	  compSpeed = 2;
+	  
+	  window.onload = function() {
+	    canvas = document.getElementById('canvas');
+		ctx = canvas.getContext('2d');
+		setInterval(mainLoop, 1000/30);
+		canvas.addEventListener('mousemove', function(event) {
+		  playerPaddleY = event.clientY - paddleHeight/2;
+		});
+	  }
+	  
+	  function reset() {
+	    ballX = canvas.width/2;
+		ballY = canvas.height/2;
+		ballDX = 4;
+		ballDY = 4;
+	  }
+	  
+	  function mainLoop() {
+	    // Update positioning
+		ballX += ballDX;
+		ballY += ballDY;
+
+		// Check for collisions
+		if (ballY < 0 && ballDY < 0) {
+		  ballDY = -ballDY;
+		}
+		if (ballY > canvas.height && ballDY > 0) {
+		  ballDY = -ballDY;
+		}
+		if (ballX < paddleWidth) {
+		  if (ballY > playerPaddleY && ballY < playerPaddleY + paddleHeight) {
+		    ballDX = -ballDX;
+		  } else {
+		    compScore++;
+			reset();
+		  }
+		}
+		if (ballX > canvas.width - paddleWidth) {
+		  if (ballY > compPaddleY && ballY < compPaddleY + paddleHeight) {
+		    ballDX = -ballDX;
+		  } else {
+		    playerScore++;
+			reset();
+		  }
+		}
+		
+		// Move comp paddle
+		if (compPaddleY + paddleHeight/2 < ballY) {
+		  compPaddleY += compSpeed;
+		} else {
+		  compPaddleY -= compSpeed;
+		}
+	  
+	    // Draw background
+	    ctx.fillStyle = 'black';
+		ctx.fillRect(0, 0, canvas.width, canvas.height);
+		
+		// Draw paddles
+		ctx.fillStyle='white';
+		ctx.fillRect(0, playerPaddleY, paddleWidth, paddleHeight);
+		ctx.fillRect(canvas.width - paddleWidth, compPaddleY, paddleWidth, paddleHeight);
+
+		// Draw ball
+		ctx.fillRect(ballX - (ballSize / 2), ballY - (ballSize / 2), ballSize, ballSize);
+		
+		// Draw scores
+		ctx.font = "20px Georgia"
+		ctx.fillText(playerScore, 100, 50);
+		ctx.fillText(compScore, canvas.width - 100, 50);
+	  }
+	</script>
+  </body>
+</html>
