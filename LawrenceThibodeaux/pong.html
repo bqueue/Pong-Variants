@@ -16,10 +16,58 @@
       compSpeed = 3;
       ballImage = new Image();
       ballImage.src = 'ball.png';
+      isPlayersBall = true;
+      brickWidth = 10;
+      brickHeight = 50;
+      brickSpacing = 25;
       
+      var Brick = function(brickX, brickY) {
+        this.brickX = brickX;
+        this.brickY = brickY;
+        this.isVisible = true;
+        
+        this.draw = function() {
+          if (this.isVisible) {
+            ctx.beginPath();
+            ctx.fillStyle='white';
+            ctx.fillRect(brickX, brickY, brickWidth, brickHeight);
+          }
+        }
+
+        this.checkCollision = function() {
+          if (this.isVisible) {
+            if (ballX > brickX && ballX < brickX + brickWidth
+             && ballY > brickY && ballY < brickY + brickHeight) {
+               ballDX = -ballDX;
+               this.isVisible = false;
+               if (isPlayersBall) {
+                 playerScore++;
+               } else {
+                 compScore++;
+               }
+             }
+          }
+        }
+        
+        this.reset = function() {
+          this.isVisible = true;
+        }
+      }
+
+      var bricks = new Array(50);
+      
+      function initBricks() {
+        var i;
+        for (i = 0; i < bricks.length; i++) {
+          bricks[i] = new Brick(160 + Math.floor(i / 5) * (brickWidth + brickSpacing),
+                                60 + (i % 5) * (brickHeight + brickSpacing));
+        }
+      }
+
       window.onload = function() {
         canvas = document.getElementById('canvas');
         ctx = canvas.getContext('2d');
+        initBricks();
         setInterval(mainLoop, 1000/30);
         canvas.addEventListener('mousemove', function(event) {
           playerPaddleY = event.clientY - paddleHeight/2;
@@ -27,10 +75,20 @@
       }
       
       function reset() {
-        ballX = canvas.width/2;
-        ballY = canvas.height/2;
+        if (isPlayersBall) {
+          ballX = paddleWidth + 10;
+          ballY = playerPaddleY + paddleHeight/2;
+        } else {
+          ballX = canvas.width - (paddleWidth + 10);
+          ballY = compPaddleY + paddleHeight/2;
+        }
         ballDX = 4;
         ballDY = 4;
+        
+        var i;
+        for (i = 0; i < bricks.length; i++) {
+          bricks[i].reset();
+        }
       }
       
       function mainLoop() {
@@ -52,6 +110,7 @@
             var ballOffset = ballY - paddleMid;
             var speedAdjust = 3*(ballOffset / (paddleHeight/2));
             ballDY += speedAdjust;
+            isPlayersBall = true;
           } else {
             compScore++;
             reset();
@@ -64,10 +123,16 @@
             var ballOffset = ballY - paddleMid;
             var speedAdjust = 3*(ballOffset / (paddleHeight/2));
             ballDY += speedAdjust;
+            isPlayersBall = false;
           } else {
             playerScore++;
             reset();
           }
+        }
+        
+        var i;
+        for (i = 0; i < bricks.length; i++) {
+          bricks[i].checkCollision();
         }
         
         // Move comp paddle
@@ -88,6 +153,12 @@
 
         // Draw ball
         ctx.drawImage(ballImage, ballX - (ballSize / 2), ballY - (ballSize / 2), ballSize, ballSize);
+        
+        // Draw bricks
+        var i;
+        for (i = 0; i < bricks.length; i++) {
+          bricks[i].draw();
+        }
         
         // Draw scores
         ctx.font = "20px Georgia"
