@@ -4,56 +4,21 @@
   </head>
   <body>
     <canvas id="canvas" width="640" height="480" />
-    <script>
+    <script src = 'brick.js' type = 'text/javascript' ></script>
+    <script language = 'javascript'>
       // Filthy globals
-      playerPaddleY = compPaddleY = 40;
-      paddleWidth = 10;
-      paddleHeight = 100;
-      ballX = ballY = 50;
-      ballDX = ballDY = 4;
-      ballSize = 20;
-      playerScore = compScore = 0;
-      compSpeed = 3;
-      ballImage = new Image();
+      var playerPaddleY = compPaddleY = 40;
+      var paddleWidth = 10;
+      var paddleHeight = 100;
+      var ballX = ballY = 50;
+      var ballDX = ballDY = 4;
+      var ballSize = 20;
+      var playerScore = compScore = 0;
+      var compSpeed = 3;
+      var ballImage = new Image();
       ballImage.src = 'ball.png';
-      isPlayersBall = true;
-      brickWidth = 10;
-      brickHeight = 50;
-      brickSpacing = 25;
-      
-      var Brick = function(brickX, brickY) {
-        this.brickX = brickX;
-        this.brickY = brickY;
-        this.isVisible = true;
-        
-        this.draw = function() {
-          if (this.isVisible) {
-            ctx.beginPath();
-            ctx.fillStyle='white';
-            ctx.fillRect(brickX, brickY, brickWidth, brickHeight);
-          }
-        }
-
-        this.checkCollision = function() {
-          if (this.isVisible) {
-            if (ballX > brickX && ballX < brickX + brickWidth
-             && ballY > brickY && ballY < brickY + brickHeight) {
-               ballDX = -ballDX;
-               this.isVisible = false;
-               if (isPlayersBall) {
-                 playerScore++;
-               } else {
-                 compScore++;
-               }
-             }
-          }
-        }
-        
-        this.reset = function() {
-          this.isVisible = true;
-        }
-      }
-
+      var isPlayersBall = true;
+      var isPlayersServe = true;
       var bricks = new Array(50);
       
       function initBricks() {
@@ -65,6 +30,7 @@
       }
 
       window.onload = function() {
+        console.log("double hello");
         canvas = document.getElementById('canvas');
         ctx = canvas.getContext('2d');
         initBricks();
@@ -75,13 +41,15 @@
       }
       
       function reset() {
-        if (isPlayersBall) {
+        if (isPlayersServe) {
           ballX = paddleWidth + 10;
           ballY = playerPaddleY + paddleHeight/2;
         } else {
           ballX = canvas.width - (paddleWidth + 10);
           ballY = compPaddleY + paddleHeight/2;
         }
+        isPlayersBall = isPlayersServe;
+        isPlayersServe = !isPlayersServe;
         ballDX = 4;
         ballDY = 4;
         
